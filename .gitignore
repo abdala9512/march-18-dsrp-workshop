@@ -1,0 +1,16 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.env
+data/*.csv
+mlruns/
+mlartifacts/
+*.png
+report.md
+validation_result.json
+.ipynb_checkpoints/
+dist/
+build/
+*.egg-info/

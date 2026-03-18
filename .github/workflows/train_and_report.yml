@@ -1,0 +1,53 @@
+name: Entrenar Modelo y Reportar
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "pyproject.toml"
+
+jobs:
+  train-and-compare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Instalar dependencias
+        run: uv sync
+
+      - name: Descargar dataset
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          uv run pip install kaggle
+          kaggle datasets download -d yasserh/uber-fares-dataset -p data/ --unzip
+
+      - name: Entrenar modelo challenger
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          DAGSHUB_REPO_OWNER: ${{ vars.DAGSHUB_REPO_OWNER }}
+          DAGSHUB_REPO_NAME: ${{ vars.DAGSHUB_REPO_NAME }}
+          MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          uv run python scripts/train_pipeline.py --model-type random_forest
+
+      - name: Configurar CML
+        uses: iterative/setup-cml@v3
+
+      - name: Publicar reporte en PR
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cml comment create report.md
