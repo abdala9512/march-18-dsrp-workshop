@@ -33,7 +33,7 @@ jobs:
       - name: Validar Challenger contra Champion
         id: validate
         env:
-          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_USER_TOKEN }}
+          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
           DAGSHUB_REPO_OWNER: ${{ vars.DAGSHUB_REPO_OWNER }}
           DAGSHUB_REPO_NAME: ${{ vars.DAGSHUB_REPO_NAME }}
         run: |
@@ -53,7 +53,7 @@ jobs:
         if: steps.validate.outputs.is_better == 'true' && inputs.auto_promote
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_USER_TOKEN }}
+          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
           DAGSHUB_REPO_OWNER: ${{ vars.DAGSHUB_REPO_OWNER }}
           DAGSHUB_REPO_NAME: ${{ vars.DAGSHUB_REPO_NAME }}
         run: |
