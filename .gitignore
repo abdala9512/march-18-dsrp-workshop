@@ -4,7 +4,6 @@ __pycache__/
 *.pyo
 .venv/
 .env
-data/*.csv
 mlruns/
 mlartifacts/
 *.png

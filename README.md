@@ -21,30 +21,28 @@ cd march-18-dsrp-workshop
 uv sync
 ```
 
-### 2. Descargar el dataset
+### 2. Configurar DagsHub
 
-Descarga el dataset desde [Kaggle](https://www.kaggle.com/datasets/yasserh/uber-fares-dataset) y coloca el archivo `uber.csv` en la carpeta `data/`:
-
-```
-data/uber.csv
-```
-
-### 3. Configurar DagsHub
-
-Crear un repositorio en DagsHub y configurar las variables de entorno:
+Crear un repositorio en DagsHub (puedes conectarlo directamente desde el navegador) y configurar las variables de entorno:
 
 ```bash
 cp .env.example .env
 # Editar .env con tus datos de DagsHub
 ```
 
-### 4. Configurar secretos en GitHub
+Solo necesitas 3 variables:
+- `DAGSHUB_REPO_OWNER` - Tu usuario de DagsHub
+- `DAGSHUB_REPO_NAME` - Nombre del repo en DagsHub
+- `DAGSHUB_USER_TOKEN` - Token de API (obtener en https://dagshub.com/user/settings/tokens)
+
+`dagshub.init()` se encarga de configurar MLflow automaticamente con ese token.
+
+### 3. Configurar secretos en GitHub
 
 En tu repositorio de GitHub, agregar:
 
 **Secrets:**
-- `DAGSHUB_TOKEN` - Token de API de DagsHub
-- `DAGSHUB_USERNAME` - Tu usuario de DagsHub
+- `DAGSHUB_USER_TOKEN` - Token de API de DagsHub
 
 **Variables:**
 - `DAGSHUB_REPO_OWNER` - Dueno del repo en DagsHub
@@ -53,8 +51,12 @@ En tu repositorio de GitHub, agregar:
 ## Estructura del proyecto
 
 ```
-├── .claude/skills/train.md    # Skill de Claude Code para entrenar
-├── .github/workflows/         # GitHub Actions (CI/CD)
+├── .claude/skills/
+│   ├── train.md               # Skill /train para entrenar modelos
+│   └── validate.md            # Skill /validate para validar y promover
+├── .github/workflows/
+│   ├── train_and_report.yml   # CI: entrena en PR y publica reporte CML
+│   └── validate_and_promote.yml # CD: valida challenger y crea PR de promocion
 ├── notebooks/
 │   ├── 01_analisis_exploratorio.ipynb  # EDA del dataset
 │   └── 02_entrenamiento_uber.ipynb     # Pipeline de entrenamiento
@@ -65,9 +67,12 @@ En tu repositorio de GitHub, agregar:
 │   ├── evaluate.py            # Evaluacion y graficos
 │   └── champion_challenger.py # Logica Champion vs Challenger
 ├── scripts/
-│   └── train_pipeline.py      # Pipeline principal (CLI)
+│   ├── train_pipeline.py      # Pipeline de entrenamiento (CLI)
+│   ├── validate_challenger.py # Validar challenger vs champion
+│   └── promote_challenger.py  # Promover modelo a champion
+├── scenarios/                 # Escenarios de ejemplo
 ├── data/
-│   └── uber.csv               # Dataset (descargar de Kaggle)
+│   └── uber.csv               # Dataset incluido en el repo
 └── pyproject.toml             # Dependencias (uv)
 ```
 
@@ -92,7 +97,8 @@ uv run python scripts/train_pipeline.py --promote
 ### Con Claude Code
 
 ```
-/train
+/train      # Entrenar un modelo interactivamente
+/validate   # Validar un challenger y disparar workflow de promocion
 ```
 
 ### Flujo CI/CD
@@ -101,6 +107,26 @@ uv run python scripts/train_pipeline.py --promote
 2. Abrir un Pull Request hacia `main`
 3. GitHub Actions entrena el modelo y publica un reporte CML en el PR
 4. Revisar el reporte y decidir si hacer merge
+
+### Validar y Promover
+
+```bash
+# Validar manualmente
+uv run python scripts/validate_challenger.py --challenger-run-id <RUN_ID>
+
+# Disparar workflow de validacion + PR automatico
+gh workflow run validate_and_promote.yml -f challenger_run_id=<RUN_ID> -f auto_promote=true
+```
+
+## Escenarios de ejemplo
+
+Ver `scenarios/README.md` para instrucciones paso a paso:
+
+```bash
+bash scenarios/01_champion_baseline.sh    # Establecer Champion base
+bash scenarios/02_better_challenger.sh    # Challenger que supera al Champion
+bash scenarios/03_worse_challenger.sh     # Challenger que pierde vs Champion
+```
 
 ## Feature Engineering
 

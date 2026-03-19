@@ -33,11 +33,9 @@ jobs:
       - name: Validar Challenger contra Champion
         id: validate
         env:
-          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_USER_TOKEN }}
           DAGSHUB_REPO_OWNER: ${{ vars.DAGSHUB_REPO_OWNER }}
           DAGSHUB_REPO_NAME: ${{ vars.DAGSHUB_REPO_NAME }}
-          MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
-          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           uv run python scripts/validate_challenger.py \
             --challenger-run-id "${{ inputs.challenger_run_id }}" \
@@ -55,11 +53,9 @@ jobs:
         if: steps.validate.outputs.is_better == 'true' && inputs.auto_promote
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_USER_TOKEN }}
           DAGSHUB_REPO_OWNER: ${{ vars.DAGSHUB_REPO_OWNER }}
           DAGSHUB_REPO_NAME: ${{ vars.DAGSHUB_REPO_NAME }}
-          MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
-          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           SHORT_ID=$(echo "${{ inputs.challenger_run_id }}" | cut -c1-8)
           BRANCH="promote/challenger-${SHORT_ID}"

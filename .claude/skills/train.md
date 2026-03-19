@@ -12,7 +12,7 @@ Ejecuta el pipeline de entrenamiento del modelo de prediccion de tarifas de Uber
 
 1. Verifica que exista el archivo `data/uber.csv`. Si no existe, indica al usuario que lo descargue de https://www.kaggle.com/datasets/yasserh/uber-fares-dataset y lo coloque en `data/uber.csv`.
 
-2. Verifica que exista un archivo `.env` en la raiz del proyecto con las variables `DAGSHUB_REPO_OWNER`, `DAGSHUB_REPO_NAME` y `DAGSHUB_TOKEN`. Si no existe, pregunta al usuario por estos valores y crea el archivo.
+2. Verifica que exista un archivo `.env` en la raiz del proyecto con las variables `DAGSHUB_REPO_OWNER`, `DAGSHUB_REPO_NAME` y `DAGSHUB_USER_TOKEN`. Si no existe, pregunta al usuario por estos valores y crea el archivo.
 
 3. Ejecuta el pipeline de entrenamiento:
    ```bash
